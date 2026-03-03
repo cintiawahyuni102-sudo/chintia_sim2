@@ -1,12 +1,17 @@
 <?php
-defined('BASEPATH')OR exit("No direct script access allowed");
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-class kategori_model extends CI_Model{
+class Kategori_model extends CI_Model {
 
-    private $tabel = 'kategori';
+    private $table = 'kategori';
 
+    // Ambil semua data
     public function get_all()
     {
-        return $this->db->get($this->tabel)->result();
+        return $this->db->get($this->table)->result();
+    }
+    public function insert($data)
+    {
+        return $this->db->insert($this->table, $data);
     }
 }
