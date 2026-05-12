@@ -1,94 +1,91 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH')OR exit('No direct script access allowed');
 
-class Buku extends CI_Controller {
+class buku extends CI_Controller{
 
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('buku_model');
         if (!$this->session->userdata('login')){
-            redirect('login');
-        $this->load->model('Buku_model');
-        $this->load->model('Kategori_model');
+        redirect('login');
+        }
     }
-
-    // tampil data
     public function index()
     {
-        $data['buku'] = $this->Buku_model->get_all();
-
+        $data['buku'] = $this->buku_model->get_all();
         $this->load->view('templates/header');
         $this->load->view('templates/sidebar');
         $this->load->view('templates/topbar');
         $this->load->view('buku/index', $data);
         $this->load->view('templates/footer');
-    }
 
-    // form tambah
+    }
     public function tambah()
     {
-        $data['kategori'] = $this->Kategori_model->get_all();
-
         $this->load->view('templates/header');
         $this->load->view('templates/sidebar');
         $this->load->view('templates/topbar');
-        $this->load->view('buku/tambah', $data);
+        $data['kategori'] = $this->db->get('kategori')->result();
+        $this->load->view('buku/tambahb',$data);
         $this->load->view('templates/footer');
     }
-
-    // simpan data
     public function simpan()
     {
-        $data = [
-            'kode_buku' => $this->input->post('kode_buku'),
-            'judul_buku' => $this->input->post('judul_buku'),
-            'penulis' => $this->input->post('penulis'),
-            'penerbit' => $this->input->post('penerbit'),
-            'tahun' => $this->input->post('tahun'),
-            'kategori_id' => $this->input->post('kategori_id'),
-            'stok' => $this->input->post('stok'),
-            'lokasi_rak' => $this->input->post('lokasi_rak'),
+        $data= [
+            'kode_buku'=> $this->input->post('kode_buku'),
+            'judul'=> $this->input->post('judul'),
+            'penulis'=> $this->input->post('penulis'),
+            'kategori'=> $this->input->post('kategori'),
+            'stok'=> $this->input->post('stok'),
+            'lokasi_rak'=> $this->input->post('lokasi_rak'),
         ];
+        
 
-        $this->Buku_model->insert($data);
+        $this->buku_model->insert($data);
         redirect('buku');
     }
-
-    // hapus
-    public function hapus($kode_buku)
+    public function hapus($id)
     {
-        $this->Buku_model->delete($kode_buku);
+        // if($this->Kategori_model->is_used($id)){
+            // $this->session->set_flashdata('error','Kategori tidak bisa dihapus karena masih digunakan');
+        // }else {
+            $this->buku_model->delete($id);
+            $this->session->set_flashdata('success','Data Berhasil dihapus');
+        // }
         redirect('buku');
     }
-
-    // edit
-    public function edit($kode_buku)
+    public function edit($id)
     {
-        $data['buku'] = $this->db->get_where('buku', ['kode_buku' => $kode_buku])->row();
-        $data['kategori'] = $this->Kategori_model->get_all();
-
+        $data['buku'] = $this->buku_model->get_by_id($id);
         $this->load->view('templates/header');
         $this->load->view('templates/sidebar');
         $this->load->view('templates/topbar');
-        $this->load->view('buku/edit', $data);
+        $this->load->view('buku/edit',$data);
         $this->load->view('templates/footer');
+
     }
-
-    // update
-    public function update($kode_buku)
+    public function update($id)
     {
-        $data = [
-            'kode_buku' => $this->input->post('kode_buku'),
-            'judul_buku' => $this->input->post('judul_buku'),
-            'penulis' => $this->input->post('penulis'),
-            'penerbit' => $this->input->post('penerbit'),
-            'tahun' => $this->input->post('tahun'),
-            'kategori_id' => $this->input->post('kategori_id'),
-            'stok' => $this->input->post('stok'),
-            'lokasi_rak' => $this->input->post('lokasi_rak'),
-        ];
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('judul','Judul','required');
+        if($this->form_validation->run()==FALSE){
 
-        $this->Buku_model->update($kode_buku, $data);
-        redirect('buku');
+        }else{
+            $data=[
+                'kode_buku'=> $this->input->post('kode_buku'),
+                'judul'=>$this->input->post('judul'),
+                'penulis'=> $this->input->post('penulis'),
+                'penerbit'=> $this->input->post('penerbit'),
+                'tahun'=> $this->input->post('tahun'),
+                'kategori'=> $this->input->post('kategori'),
+                'stok'=> $this->input->post('stok'),
+                'lokasi_rak'=> $this->input->post('lokasi_rak'),
+
+            ];
+            $this->buku_model->update($id,$data);
+            $this->session->set_flashdata('succes','Data Berhasil Di Update');
+            redirect('buku');
+        }
     }
 }
