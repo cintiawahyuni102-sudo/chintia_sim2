@@ -6,9 +6,6 @@ class Anggota extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        if (!$this->session->userdata('login')){
-        redirect('login');
-    }
         $this->load->model('Anggota_model');
     }
 
@@ -32,36 +29,46 @@ class Anggota extends CI_Controller {
     }
 
     public function simpan()
-    {
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('nomor_anggota', 'Nomor Anggota', 'required');
-        $this->form_validation->set_rules('nama', 'Nama', 'required');
-        $this->form_validation->set_rules('alamat', 'Alamat', 'required');
-        $this->form_validation->set_rules('telepon', 'Telepon', 'required');
-        $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
-        $this->form_validation->set_rules('tanggal_daftar', 'Tanggal Daftar', 'required');
+{
+    $this->load->library('form_validation');
 
-        if ($this->form_validation->run() == FALSE) {
-            $this->load->view('templates/header');
-            $this->load->view('templates/sidebar');
-            $this->load->view('templates/topbar');
-            $this->load->view('anggota/tambah');
-            $this->load->view('templates/footer');
-        } else {
-$data = [
-    'nomor_anggota' => $this->input->post('nomor_anggota'),
-    'nama'          => $this->input->post('nama'),
-    'alamat'        => $this->input->post('alamat'),
-    'telepon'       => $this->input->post('telepon'),
-    'email'         => $this->input->post('email'),
-    'tanggal_daftar'=> $this->input->post('tanggal_daftar'),
-];
+    $this->form_validation->set_rules('nomor_anggota', 'Nomor Anggota', 'required');
+    $this->form_validation->set_rules('nama', 'Nama', 'required');
+    $this->form_validation->set_rules('alamat', 'Alamat', 'required');
+    $this->form_validation->set_rules('telepon', 'Telepon', 'required');
+    $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+    $this->form_validation->set_rules('tanggal_daftar', 'Tanggal Daftar', 'required');
 
-            $this->Anggota_model->insert($data);
-            $this->session->set_flashdata('success', 'Data anggota berhasil ditambahkan');
-            redirect('anggota');
+    if ($this->form_validation->run() == FALSE) {
+        $this->load->view('templates/header');
+        $this->load->view('templates/sidebar');
+        $this->load->view('templates/topbar');
+        $this->load->view('anggota/tambah');
+        $this->load->view('templates/footer');
+    } else {
+
+        $data = [
+            'nomor_anggota' => $this->input->post('nomor_anggota'),
+            'nama'          => $this->input->post('nama'),
+            'alamat'        => $this->input->post('alamat'),
+            'telepon'       => $this->input->post('telepon'),
+            'email'         => $this->input->post('email'),
+            'tanggal_daftar'=> $this->input->post('tanggal_daftar'),
+          'status' => $this->input->post('status')
+        ];
+
+        // 🔥 CEK QUERY + ERROR DATABASE
+        if (!$this->Anggota_model->insert($data)) {
+            echo "<pre>";
+            print_r($this->db->error());
+            echo "</pre>";
+            die;
         }
+
+        echo "DATA BERHASIL MASUK 🔥";
+        die;
     }
+}
 
     public function hapus($id)
     {
@@ -89,7 +96,6 @@ $data = [
         $this->form_validation->set_rules('telepon', 'Telepon', 'required');
         $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
         $this->form_validation->set_rules('tanggal_daftar', 'Tanggal Daftar', 'required');
-        $this->form_validation->set_rules('status', 'Status', 'required');
 
         if ($this->form_validation->run() == FALSE) {
             $data['anggota'] = $this->Anggota_model->get_by_id($id);
@@ -106,7 +112,7 @@ $data = [
                 'telepon'       => $this->input->post('telepon'),
                 'email'         => $this->input->post('email'),
                 'tanggal_daftar'=> $this->input->post('tanggal_daftar'),
-                'status'        => $this->input->post('status'),
+                'status' => $this->input->post('status')
             ];
 
             $this->Anggota_model->update($id, $data);
